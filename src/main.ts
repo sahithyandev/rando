@@ -1,4 +1,5 @@
 import * as pageView from "./handlers/page-view";
+import merge from "deepmerge";
 
 const CORS_HEADERS: ResponseInit = {
 	headers: {
@@ -23,7 +24,7 @@ Bun.serve({
 			default:
 				return new Response(
 					"Not found",
-					Object.assign(
+					merge<ResponseInit>(
 						{
 							status: 404,
 						},
