@@ -1,14 +1,16 @@
 {
-  "name": "rando-api",
-  "module": "index.ts",
-  "type": "module",
-  "devDependencies": {
-    "@types/bun": "latest"
-  },
-  "peerDependencies": {
-    "typescript": "^5.0.0"
-  },
-  "dependencies": {
-    "@google-analytics/data": "^4.5.0"
-  }
+	"name": "rando-api",
+	"type": "module",
+	"scripts": {
+		"start": "bun ./src/main.ts"
+	},
+	"devDependencies": {
+		"@types/bun": "latest"
+	},
+	"peerDependencies": {
+		"typescript": "^5.0.0"
+	},
+	"dependencies": {
+		"@google-analytics/data": "^4.5.0"
+	}
 }
