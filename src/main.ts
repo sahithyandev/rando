@@ -1,6 +1,6 @@
 import * as pageView from "./handlers/page-view";
 
-const CORS_HEADERS = {
+const CORS_HEADERS: ResponseInit = {
 	headers: {
 		"Access-Control-Allow-Origin": "*",
 		"Access-Control-Allow-Methods": "GET,HEAD,PUT,PATCH,POST,DELETE",
@@ -19,11 +19,17 @@ Bun.serve({
 
 		switch (url.pathname) {
 			case "/page-view":
-				return pageView.GET(request);
+				return pageView.GET(request, CORS_HEADERS);
 			default:
-				return new Response("Not found", {
-					status: 404,
-				});
+				return new Response(
+					"Not found",
+					Object.assign(
+						{
+							status: 404,
+						},
+						CORS_HEADERS
+					)
+				);
 		}
 	},
 });

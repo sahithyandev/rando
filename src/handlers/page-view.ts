@@ -33,7 +33,10 @@ const headers = new Headers();
 headers.set("Content-Type", "application/json");
 headers.set("Cache-Control", `public, max-age=${RESPONSE_MAX_AGE}`);
 
-export async function GET(request: Request) {
+export async function GET(
+	request: Request,
+	responseInitOptions?: ResponseInit
+) {
 	const url = new URL(request.url);
 	const pagePath = url.searchParams.get("path");
 	console.log("pagePath", pagePath);
@@ -62,12 +65,26 @@ export async function GET(request: Request) {
 	const rows = response?.rows;
 	if (!rows) {
 		console.log(response);
-		return new Response("Not available now", {
-			status: 500,
-		});
+		return new Response(
+			"Not available now",
+			Object.assign(
+				{
+					status: 500,
+				},
+				responseInitOptions
+			)
+		);
 	}
 
 	const map: Record<string, string> = {};
+	const _responseOptions: ResponseInit = Object.assign(
+		{
+			status: 200,
+			headers,
+		},
+		responseInitOptions
+	);
+
 	for (const row of rows) {
 		if (!row.dimensionValues || !row.metricValues) {
 			continue;
@@ -83,10 +100,7 @@ export async function GET(request: Request) {
 					views: value || "0",
 					dateRetrievedOn: new Date().toISOString(),
 				}),
-				{
-					status: 200,
-					headers,
-				}
+				_responseOptions
 			);
 		}
 	}
@@ -96,9 +110,6 @@ export async function GET(request: Request) {
 			pages: map,
 			dataRetrievedOn: new Date().toISOString(),
 		}),
-		{
-			status: 200,
-			headers,
-		}
+		_responseOptions
 	);
 }
