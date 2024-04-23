@@ -3,6 +3,8 @@ import { BetaAnalyticsDataClient, type protos } from "@google-analytics/data";
 import { join } from "path";
 import { readFileStructure } from "../utils";
 
+const RESPONSE_MAX_AGE = 108000; // 30 hours in seconds
+
 /**
  * TODO(developer): Uncomment this variable and replace with your
  *   Google Analytics 4 property ID before running the sample.
@@ -26,6 +28,10 @@ console.log(
 // Using a default constructor instructs the client to use the credentials
 // specified in GOOGLE_APPLICATION_CREDENTIALS environment variable.
 const analyticsDataClient = new BetaAnalyticsDataClient();
+
+const headers = new Headers();
+headers.set("Content-Type", "application/json");
+headers.set("Cache-Control", `public, max-age=${RESPONSE_MAX_AGE}`);
 
 export async function GET(request: Request) {
 	const url = new URL(request.url);
@@ -72,9 +78,16 @@ export async function GET(request: Request) {
 		if (!pagePath && typeof key === "string" && typeof value === "string") {
 			map[key] = value;
 		} else if (pagePath === key) {
-			return new Response(value || "0", {
-				status: 200,
-			});
+			return new Response(
+				JSON.stringify({
+					views: value || "0",
+					dateRetrievedOn: new Date().toISOString(),
+				}),
+				{
+					status: 200,
+					headers,
+				}
+			);
 		}
 	}
 
@@ -85,10 +98,7 @@ export async function GET(request: Request) {
 		}),
 		{
 			status: 200,
-			headers: {
-				"Content-Type": "application/json",
-				"Cache-Control": "public, max-age=",
-			},
+			headers,
 		}
 	);
 }
