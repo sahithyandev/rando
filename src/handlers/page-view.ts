@@ -52,9 +52,9 @@ export async function GET(
 		request.headers.forEach((value, key) => {
 			console.log("header", key, value);
 		});
-		const hostHeader = request.headers.get("Host");
-		if (hostHeader) {
-			targetDomain = hostHeader.split(":")[0];
+		const originHeader = request.headers.get("Origin");
+		if (originHeader) {
+			targetDomain = originHeader.split(":")[0].split("://")[1];
 		}
 	}
 
