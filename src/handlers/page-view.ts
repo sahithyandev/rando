@@ -49,12 +49,9 @@ export async function GET(
 
 	let targetDomain = url.searchParams.get("domain");
 	if (!targetDomain) {
-		request.headers.forEach((value, key) => {
-			console.log("header", key, value);
-		});
 		const originHeader = request.headers.get("Origin");
 		if (originHeader) {
-			targetDomain = originHeader.split(":")[0].split("://")[1];
+			targetDomain = originHeader.replace("https://", "").split(":")[0];
 		}
 	}
 
