@@ -15,6 +15,7 @@ func main() {
 
 	mux.HandleFunc("/", internal.GetIndex)
 	mux.HandleFunc("/page-view", internal.GetPageView)
+	mux.HandleFunc("/live-users-count", internal.GetLiveUsersCount)
 
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
