@@ -16,8 +16,9 @@ import (
 const RESPONSE_MAX_AGE = 108600
 
 var propertyIdMap = map[string]string{
-	"sahithyan.dev": "356543625",
-	"kalvi.lk":      "398313900",
+	"sahithyan.dev":    "356543625",
+	"kalvi.lk":         "398313900",
+	"s1.sahithyan.dev": "449008877",
 }
 
 func GetPageView(w http.ResponseWriter, r *http.Request) {
