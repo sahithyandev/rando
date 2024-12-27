@@ -13,6 +13,8 @@ var (
 )
 
 func GetLiveUsersCount(w http.ResponseWriter, r *http.Request) {
+	isPeeking := r.URL.Query().Has("peek")
+
 	// Extract the domain from the query parameters
 	domain := r.URL.Query().Get("d")
 	if domain == "" {
@@ -29,9 +31,11 @@ func GetLiveUsersCount(w http.ResponseWriter, r *http.Request) {
 
 	// Increment the user count for the specified domain
 	mu.Lock()
-	UsersCount[domain] += 1
-	currentCount := UsersCount[domain]
+	if !isPeeking {
+		UsersCount[domain] += 1
+	}
 	clients[w] = domain // Associate this client with the domain
+	currentCount := UsersCount[domain]
 	mu.Unlock()
 
 	// Broadcast the updated count for this domain
@@ -44,7 +48,9 @@ func GetLiveUsersCount(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Client disconnected for domain:", domain)
 
 	mu.Lock()
-	UsersCount[domain] -= 1
+	if !isPeeking {
+		UsersCount[domain] -= 1
+	}
 	updatedCount := UsersCount[domain]
 	delete(clients, w) // Remove the client
 	mu.Unlock()
