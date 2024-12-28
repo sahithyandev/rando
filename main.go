@@ -13,7 +13,7 @@ import (
 func main() {
 	mux := http.NewServeMux()
 
-	mux.HandleFunc("/", internal.GetIndex)
+	mux.Handle("/", http.FileServer(http.Dir("./public")))
 	mux.HandleFunc("/page-view", internal.GetPageView)
 	mux.HandleFunc("/live-users-count", internal.GetLiveUsersCount)
 

@@ -1,0 +1,172 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<meta name="viewport" content="width=device-width, initial-scale=1.0">
+	<title>Rando API</title>
+	<style>
+		* {
+			box-sizing: border-box;
+		}
+
+		*:not(:where(pre *)) {
+			font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+		}
+
+		:root {
+			--body-width: min(56rem, 72vw);
+			font-size: 22px;
+			line-height: 1.4;
+		}
+
+		html,
+		body {
+			padding: 0;
+		}
+
+		body {
+			width: var(--body-width);
+			margin: 50px auto;
+		}
+
+		p,
+		td {
+			max-width: 70ch;
+		}
+
+		header {
+			display: flex;
+			gap: 12px;
+			align-items: baseline;
+		}
+
+		h1 {
+			margin-bottom: 0;
+		}
+
+		header h2 {
+			margin-top: 0;
+			font-size: .9em;
+		}
+
+		table {
+			border-collapse: collapse;
+			margin: 20px 0;
+			width: 100%;
+		}
+
+		th,
+		td {
+			padding: 12px;
+			border: 1px solid #ddd;
+			text-align: left;
+		}
+
+		th {
+			background-color: #f4f4f4;
+		}
+
+		pre:has(code),
+		:not(pre) code {
+			border-radius: 8px;
+			font-family: "Courier New", Courier, monospace;
+		}
+
+		:not(pre) code {
+			padding: 4px 6px;
+			background-color: #d1d1d1;
+		}
+
+		pre:has(code) {
+			border: 4px solid rgb(197, 197, 197);
+			font-size: .9em;
+		}
+	</style>
+	<link rel="stylesheet"
+		href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-light.min.css">
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+	<!-- and it's easy to individually load additional languages -->
+	<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/javascript.min.js"></script>
+	<script>hljs.highlightAll();</script>
+</head>
+
+<body>
+	<header>
+		<h1>Rando</h1>
+		<h2>
+			<span>by <a href="https://sahithyan.dev">Sahithyan</a></span>
+		</h2>
+	</header>
+	<main>
+		<p>
+			Random set of APIs which are designed for my own use. Written in golang.
+		</p>
+		</div>
+
+		<h2>
+			Endpoints
+		</h2>
+
+		<section>
+			<h3>
+				/live-users-count
+			</h3>
+			<p>
+				An API to get the number of users who are currently online. Works by using <a
+					href="https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events">Server-Sent Events</a> instead of
+				WebSockets. The <code>d</code> parameter is used to specify the domain for which you want to get the live user
+				count. This will
+				subscribe the user to the domain's live user count and increase the count.
+			</p>
+
+			<h4>Example</h4>
+			<pre><code class="language-javascript">// Connect to the /live-user-count for example.com
+const eventSource = new EventSource(
+	"//rando.sahithyan.dev/live-users-count?d=example.com",
+	{},
+);
+
+// Whenever the user count changes, the server will send a message event
+eventSource.addEventListener("message", (event) => {
+	console.log(event.data);
+});
+
+// "open" event is triggered when the connection is established successfully
+eventSource.addEventListener("open", () => {
+	console.log("connected");
+});
+</code></pre>
+
+			<h4>
+				Parameters
+			</h4>
+
+			<table>
+				<thead>
+					<tr>
+						<th>Parameter</th>
+						<th>Type</th>
+						<th>Description</th>
+					</tr>
+				</thead>
+				<tbody>
+					<tr>
+						<td>d</td>
+						<td>string</td>
+						<td>The domain for which you want to get the live user count. Will respond with an error if not provided.
+						</td>
+					</tr>
+					<tr>
+						<td>peek</td>
+						<td>boolean</td>
+						<td>When provided (set to true), the current subcriber will not be counted as a user. Default: false.</td>
+					</tr>
+				</tbody>
+			</table>
+
+		</section>
+	</main>
+</body>
+
+</html>
