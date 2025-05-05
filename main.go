@@ -13,18 +13,17 @@ import (
 )
 
 func main() {
- err := godotenv.Load()
-  if err != nil {
-    log.Fatal("Error loading .env file")
-  }
-	
-	
+	err := godotenv.Load()
+	if err != nil {
+		log.Fatal("Error loading .env file")
+	}
+
 	mux := http.NewServeMux()
 
 	mux.Handle("/", http.FileServer(http.Dir("./public")))
 	mux.HandleFunc("/page-view", internal.GetPageView)
 	mux.HandleFunc("/live-users-count", internal.GetLiveUsersCount)
-	
+
 	internal.StartTelegramPABot()
 
 	PORT := os.Getenv("PORT")
@@ -36,6 +35,7 @@ func main() {
 
 	handler := cors.Default().Handler(mux)
 	err = http.ListenAndServe(PORT, handler)
+	fmt.Println("Server is running.")
 
 	if errors.Is(err, http.ErrServerClosed) {
 		fmt.Printf("server closed\n")

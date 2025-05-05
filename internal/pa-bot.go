@@ -37,6 +37,7 @@ func StartTelegramPABot() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, helpHandler)
 
 	b.Start(ctx)
+	fmt.Println("Telegram PA bot is started.")
 }
 
 func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
