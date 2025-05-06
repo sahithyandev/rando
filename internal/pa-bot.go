@@ -5,7 +5,6 @@ import (
 	"fmt"
 	"os"
 	"os/exec"
-	"os/signal"
 	"strings"
 
 	"github.com/go-telegram/bot"
@@ -14,10 +13,7 @@ import (
 
 const OwnerUserId = int64(6328469595)
 
-func StartTelegramPABot() {
-	ctx, cancel := signal.NotifyContext(context.Background(), os.Interrupt)
-	defer cancel()
-
+func StartTelegramPABot(ctx context.Context) {
 	opts := []bot.Option{
 		bot.WithDefaultHandler(handler),
 	}
@@ -37,7 +33,6 @@ func StartTelegramPABot() {
 	b.RegisterHandler(bot.HandlerTypeMessageText, "/help", bot.MatchTypeExact, helpHandler)
 
 	b.Start(ctx)
-	fmt.Println("Telegram PA bot is started.")
 }
 
 func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
