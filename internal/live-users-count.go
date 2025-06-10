@@ -76,7 +76,7 @@ func GetLiveUsersCount(w http.ResponseWriter, r *http.Request) {
 	fmt.Println("Client disconnected for domain:", domain)
 
 	mu.Lock()
-	if !isPeeking {
+	if !isPeeking && UsersCount[domain] > 0 {
 		UsersCount[domain] -= 1
 	}
 	updatedCount := UsersCount[domain]
@@ -109,4 +109,40 @@ func broadcastCount(domain string, count uint32) {
 			delete(clients, client)
 		}
 	}
+}
+
+func StartClientCleanup(interval time.Duration) {
+	go func() {
+		ticker := time.NewTicker(interval)
+		defer ticker.Stop()
+
+		for range ticker.C {
+			mu.Lock()
+			for w, domain := range clients {
+				// Try sending an SSE ping
+				_, err := fmt.Fprintf(w, ": ping\n\n")
+				if err != nil {
+					fmt.Println("Cleaning up dead client for domain:", domain)
+					delete(clients, w)
+					if UsersCount[domain] > 0 {
+						UsersCount[domain]--
+					}
+					continue
+				}
+
+				// Try flushing
+				if f, ok := w.(http.Flusher); ok {
+					f.Flush()
+				} else {
+					// If not flushable, remove anyway
+					fmt.Println("Client not flushable, removing:", domain)
+					delete(clients, w)
+					if UsersCount[domain] > 0 {
+						UsersCount[domain]--
+					}
+				}
+			}
+			mu.Unlock()
+		}
+	}()
 }

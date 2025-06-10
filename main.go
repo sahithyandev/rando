@@ -32,6 +32,8 @@ func main() {
 	mux.HandleFunc("/page-view", internal.GetPageView)
 	mux.HandleFunc("/live-users-count", internal.GetLiveUsersCount)
 
+	internal.StartClientCleanup(30 * time.Second)
+
 	PORT := os.Getenv("PORT")
 	if PORT == "" {
 		PORT = "3000"
