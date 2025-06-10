@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"net/http"
 	"sync"
+	"time"
 )
 
 var (
@@ -28,6 +29,10 @@ func GetLiveUsersCount(w http.ResponseWriter, r *http.Request) {
 	w.WriteHeader(http.StatusOK)
 
 	clientGone := r.Context().Done()
+	pingInterval := time.NewTicker(15 * time.Second)
+	defer pingInterval.Stop()
+
+	done := make(chan struct{})
 
 	// Increment the user count for the specified domain
 	mu.Lock()
@@ -41,8 +46,31 @@ func GetLiveUsersCount(w http.ResponseWriter, r *http.Request) {
 	// Broadcast the updated count for this domain
 	broadcastCount(domain, currentCount)
 
-	// Wait for client disconnect
-	<-clientGone
+	// Start ping loop in a goroutine
+	go func() {
+		for {
+			select {
+			case <-pingInterval.C:
+				mu.Lock()
+				_, err := fmt.Fprintf(w, ": ping\n\n") // SSE comment as heartbeat
+				if err != nil {
+					mu.Unlock()
+					done <- struct{}{}
+					return
+				}
+				if f, ok := w.(http.Flusher); ok {
+					f.Flush()
+				}
+				mu.Unlock()
+			case <-clientGone:
+				done <- struct{}{}
+				return
+			}
+		}
+	}()
+
+	// wait for the client to disconnect
+	<-done
 
 	// When client disconnects, decrement the count for the domain
 	fmt.Println("Client disconnected for domain:", domain)
@@ -65,20 +93,20 @@ func broadcastCount(domain string, count uint32) {
 	defer mu.Unlock()
 
 	for client, clientDomain := range clients {
-		if clientDomain == domain {
-			_, err := fmt.Fprintf(client, "data: %d\n\n", count)
-			if err != nil {
-				// If writing fails (e.g., client disconnected), remove the client
-				delete(clients, client)
-				continue
-			}
+		if clientDomain != domain {
+			continue
+		}
+		_, err := fmt.Fprintf(client, "data: %d\n\n", count)
+		if err != nil {
+			// If writing fails (e.g., client disconnected), remove the client
+			delete(clients, client)
+		}
 
-			// Flush to make sure the message is sent immediately
-			err = http.NewResponseController(client).Flush()
-			if err != nil {
-				// Handle flushing error and remove client if necessary
-				delete(clients, client)
-			}
+		// Flush to make sure the message is sent immediately
+		err = http.NewResponseController(client).Flush()
+		if err != nil {
+			// Handle flushing error and remove client if necessary
+			delete(clients, client)
 		}
 	}
 }
